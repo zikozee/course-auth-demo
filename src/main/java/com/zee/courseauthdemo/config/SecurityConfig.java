@@ -36,6 +36,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -118,8 +119,23 @@ public class SecurityConfig {
                         .build())
                 .build();
 
+        RegisteredClient oidcClientPkce = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("oidc-client2")
+                .clientSecret("{noop}secret2") // must be different from above else error is thrown
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .redirectUri("https://spring.io")
+                .postLogoutRedirectUri("http://127.0.0.1:8080/")
+                .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .clientSettings(ClientSettings.builder()
+                        .requireProofKey(true)
+                        .build())
+                .build();
 
-        return new InMemoryRegisteredClientRepository(oidcClient);
+
+        return new InMemoryRegisteredClientRepository(List.of(oidcClient, oidcClientPkce));
     }
 
     @Bean
