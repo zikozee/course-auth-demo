@@ -45,3 +45,17 @@ http://127.0.0.1:8080/oauth2/authorize?response_type=code&client_id=oidc-client2
   - SPAs- Single Page Applications (React, Angular, Vue)
   - Mobile apps
   - Desktop apps
+
+
+
+# Refresh Token
+- used to generate another access-token and refresh token
+
+## hidden classes to debug
+  - ClientSecretAuthenticationProvider
+  - OAuth2RefreshTokenAuthenticationToken
+  - OAuth2RefreshTokenAuthenticationProvider
+
+## When to use
+  - for authorization code token refresh
+  - for pkce token refresh
