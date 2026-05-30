@@ -59,3 +59,15 @@ http://127.0.0.1:8080/oauth2/authorize?response_type=code&client_id=oidc-client2
 ## When to use
   - for authorization code token refresh
   - for pkce token refresh
+
+
+# Client Credentials
+
+## hidden classes to debug
+  - ClientSecretAuthenticationProvider
+  - OAuth2ClientCredentialsAuthenticationToken
+  - OAuth2ClientCredentialsAuthenticationProvider
+  
+  - helper classes
+    - OAuth2ClientCredentialsAuthenticationContext
+    - OAuth2ClientCredentialsAuthenticationValidator

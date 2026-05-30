@@ -134,8 +134,22 @@ public class SecurityConfig {
                         .build())
                 .build();
 
+        RegisteredClient clientCredentials = RegisteredClient.withId(UUID.randomUUID().toString())
+                .clientId("oidc-client3")
+                .clientSecret("{noop}secret3") // must be different from above else error is thrown
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .redirectUri("https://spring.io")
+                .postLogoutRedirectUri("http://127.0.0.1:8080/")
+                .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .clientSettings(ClientSettings.builder()
+                        .requireProofKey(true)
+                        .build())
+                .build();
 
-        return new InMemoryRegisteredClientRepository(List.of(oidcClient, oidcClientPkce));
+
+        return new InMemoryRegisteredClientRepository(List.of(oidcClient, oidcClientPkce, clientCredentials));
     }
 
     @Bean
