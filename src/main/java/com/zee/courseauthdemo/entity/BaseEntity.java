@@ -5,9 +5,8 @@ package com.zee.courseauthdemo.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -28,14 +27,17 @@ import java.time.Instant;
 @Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor
+@SuperBuilder
 public abstract class BaseEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Builder.Default
     @Column(name = "created_date", nullable = false, updatable = false)
     @CreatedDate
-    protected Instant createdDate;
+    protected Instant createdDate= Instant.now();
 
     @CreatedBy
     @Column(name = "created_by", length = 50)

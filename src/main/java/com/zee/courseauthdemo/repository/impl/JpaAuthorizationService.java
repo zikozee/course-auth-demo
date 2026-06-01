@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
@@ -32,6 +33,7 @@ import tools.jackson.databind.json.JsonMapper;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -90,7 +92,26 @@ public class JpaAuthorizationService implements OAuth2AuthorizationService {
 
     @Override
     public @Nullable OAuth2Authorization findByToken(String token, @Nullable OAuth2TokenType tokenType) {
-        return null;
+        Assert.hasText(token, "token cannot be empty");
+
+        Optional<Authorization> result;
+        if (tokenType == null) {
+            result = this.authorizationRepository.findByStateOrAuthorizationCodeValueOrAccessTokenValueOrRefreshTokenValueOrOidcIdTokenValueOrUserCodeValueOrDeviceCodeValue(token);
+        } else if (OAuth2ParameterNames.STATE.equals(tokenType.getValue())) {
+            result = this.authorizationRepository.findByState(token);
+        } else if (OAuth2ParameterNames.CODE.equals(tokenType.getValue())) {
+            result = this.authorizationRepository.findByAuthorizationCodeValue(token);
+        } else if (OAuth2ParameterNames.ACCESS_TOKEN.equals(tokenType.getValue())) {
+            result = this.authorizationRepository.findByAccessTokenValue(token);
+        } else if (OAuth2ParameterNames.REFRESH_TOKEN.equals(tokenType.getValue())) {
+            result = this.authorizationRepository.findByRefreshTokenValue(token);
+        } else if (OidcParameterNames.ID_TOKEN.equals(tokenType.getValue())) {
+            result = this.authorizationRepository.findByOidcIdTokenValue(token);
+        } else {
+            result = Optional.empty();
+        }
+
+        return result.map(this::fromAuthorizationEntity).orElse(null);
     }
 
     public OAuth2Authorization fromAuthorizationEntity(Authorization entity) {

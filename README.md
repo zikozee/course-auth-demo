@@ -71,3 +71,11 @@ http://127.0.0.1:8080/oauth2/authorize?response_type=code&client_id=oidc-client2
   - helper classes
     - OAuth2ClientCredentialsAuthenticationContext
     - OAuth2ClientCredentialsAuthenticationValidator
+
+
+# Custom grant
+- create Authorization and Client Entity
+- create respective repository
+- create respective jpa implementations
+- move registered client to jpa Registered Repository (hard code)
+- initialize properties to talk to the database

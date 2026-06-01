@@ -1,7 +1,41 @@
 spring:
   application:
     name: course-auth-demo
+  profiles:
+    active: local
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${AUTH_DB_HOST:localhost}:${AUTH_DB_PORT:5432}/${AUTH_DB_NAME:auth_demo}
+    username: ${AUTH_DB_USERNAME:postgres}
+    password: ${AUTH_DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:5}
+      idle-timeout: ${HIKARI_IDLE_TIMEOUT:30000}
+      max-lifetime: ${HIKARI_MAX_LIFETIME:1800000}
+      connection-test-query: SELECT 1
+  jpa:
+    database: POSTGRESQL
+    show-sql: ${SHOW_SQL:true}
+    hibernate:
+      ddl-auto: update
+
+  sql:
+    init:
+      platform: postgres
+
+
+  data:
+    redis:
+      repositories:
+        enabled: ${REDIS_DATA_REPO_ENABLED:false}
+
+
+  threads:
+    virtual:
+      enabled: true
 
 logging:
   level:
     org.springframework.security: debug
+    org.springframework.data: debug

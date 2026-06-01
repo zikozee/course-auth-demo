@@ -38,4 +38,5 @@ public class Client extends BaseEntity {
     private int accessTokenTimeToLiveInMinutes;
     @Column(name="refresh_token_ttl", length = 2)
     private int refreshTokenTimeToLiveInMinutes;
+    private boolean requiresProofKey;
 }
