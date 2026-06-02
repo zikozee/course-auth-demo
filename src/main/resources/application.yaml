@@ -39,3 +39,10 @@ logging:
   level:
     org.springframework.security: debug
     org.springframework.data: debug
+
+private-key:
+  name: authdemo.jks
+  password: ${KEY_PASSWORD:2026Auth}
+  alias: ${KEY_ALIAS:authdemo}
+  # this ensures multiple instances of auth server can decode tokens
+  id: ${KEY_ID:38c85095-49c0-482f-9a7d-f9ce917b76b6}
