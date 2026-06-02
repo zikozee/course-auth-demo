@@ -1,0 +1,25 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth_demo
+      PGDATA: /data/postgres
+    volumes:
+      - /Users/zikozee/docker_db/auth_demo:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    shm_size: '1g'
+    #cause of error could not resize shared memory segment
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+
+volumes:
+  postgres:
