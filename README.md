@@ -1,5 +1,5 @@
 # Authorization Code
-http://127.0.0.1:8080/oauth2/authorize?response_type=code&client_id=oidc-client&scope=openid&statexyz&redirect_uri=https://spring.io
+http://127.0.0.1:8080/oauth2/authorize?response_type=code&client_id=oidc-client&scope=openid&state=xyz&redirect_uri=https://spring.io
 
 ## Flow Steps - see Diagram
 	1.	App redirects user to Authorization Server

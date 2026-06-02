@@ -52,7 +52,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
         client1.setRequiresProofKey(false);
 
         Client client2 = new Client();
-        client1.setId(2L);
+        client2.setId(2L);
         client2.setClientId("oidc-client2");
         client2.setClientSecret("{noop}secret2");
         client2.setClientName("client2");
@@ -66,7 +66,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
         client2.setRequiresProofKey(true);
 
         Client client3 = new Client();
-        client1.setId(3L);
+        client3.setId(3L);
         client3.setClientId("oidc-client");
         client3.setClientSecret("{noop}secret");
         client3.setClientName("client3");
