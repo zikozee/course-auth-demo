@@ -98,16 +98,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails userDetails = User.builder()
-                .username("user")
-                .password(passwordEncoder.encode("password"))
-                .authorities("coder")
-                .build();
-
-        return new InMemoryUserDetailsManager(userDetails);
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+//        UserDetails userDetails = User.builder()
+//                .username("user")
+//                .password(passwordEncoder.encode("password"))
+//                .authorities("coder")
+//                .build();
+//
+//        return new InMemoryUserDetailsManager(userDetails);
+//    }
 
 
     //each Registered Client must have the grant and type(pkce) configured

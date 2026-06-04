@@ -3,6 +3,7 @@ package com.zee.courseauthdemo.util;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
@@ -19,10 +20,13 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class JsonUtil {
 
     private final ObjectMapper objectMapper;
+
+    public JsonUtil(@Qualifier("customObjectMapper") ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     public <T> T fromJSON(String json, Class<T> clazz) {
         try {

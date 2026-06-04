@@ -19,8 +19,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class AppConfig {
 
     @Bean
-    @Primary
-    ObjectMapper objectMapper() {
+    ObjectMapper customObjectMapper() {
         return JsonMapper.builder()
                 .findAndAddModules()
                 .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
