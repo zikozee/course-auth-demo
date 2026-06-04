@@ -1,11 +1,12 @@
 package com.zee.courseauthdemo.repository.impl;
 
 
+import com.zee.courseauthdemo.PasswordEncoderTest;
 import com.zee.courseauthdemo.entity.Client;
 import com.zee.courseauthdemo.repository.ClientRepository;
 import com.zee.courseauthdemo.util.AuthUtil;
-import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -31,16 +32,18 @@ import java.util.*;
 public class JpaRegisteredClientRepository implements RegisteredClientRepository {
 
     private final ClientRepository clientRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private List<Client> clients;
 
-    public JpaRegisteredClientRepository(ClientRepository clientRepository) {
+    public JpaRegisteredClientRepository(ClientRepository clientRepository, PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
+        this.passwordEncoder = passwordEncoder;
 
         Client client1 = new Client();
         client1.setId(1L);
         client1.setClientId("oidc-client");
-        client1.setClientSecret("{noop}secret");
+        client1.setClientSecret(passwordEncoder.encode("secret"));
         client1.setClientName("client1");
         client1.setClientAuthenticationMethods(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue());
         client1.setAuthorizationGrantTypes(AuthorizationGrantType.AUTHORIZATION_CODE.getValue() + "," + AuthorizationGrantType.REFRESH_TOKEN.getValue());
@@ -54,7 +57,7 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
         Client client2 = new Client();
         client2.setId(2L);
         client2.setClientId("oidc-client2");
-        client2.setClientSecret("{noop}secret2");
+        client2.setClientSecret(passwordEncoder.encode("secret2"));
         client2.setClientName("client2");
         client2.setClientAuthenticationMethods(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue());
         client2.setAuthorizationGrantTypes(AuthorizationGrantType.AUTHORIZATION_CODE.getValue() + "," + AuthorizationGrantType.REFRESH_TOKEN.getValue());
@@ -67,8 +70,8 @@ public class JpaRegisteredClientRepository implements RegisteredClientRepository
 
         Client client3 = new Client();
         client3.setId(3L);
-        client3.setClientId("oidc-client");
-        client3.setClientSecret("{noop}secret");
+        client3.setClientId("oidc-client3");
+        client3.setClientSecret(passwordEncoder.encode("secret3"));
         client3.setClientName("client3");
         client3.setClientAuthenticationMethods(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue());
         client3.setAuthorizationGrantTypes(AuthorizationGrantType.CLIENT_CREDENTIALS.getValue());

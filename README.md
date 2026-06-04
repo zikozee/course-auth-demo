@@ -79,3 +79,8 @@ http://127.0.0.1:8080/oauth2/authorize?response_type=code&client_id=oidc-client2
 - create respective jpa implementations
 - move registered client to jpa Registered Repository (hard code)
 - initialize properties to talk to the database
+ 
+- generate keypair and externalize privateKeyName, privateKeyPassword and privateKeyAlias to build JWKSource used for signing tokens
+  - use same app java version to generate the below 
+  - keytool -genkeypair -validity 3650 -keysize 2048 -alias authdemo -keyalg RSA -keypass 2026Auth -keystore authdemo.jks -storepass 2026Auth
+  - verify token with jwt.io to see private key id (**kid**)

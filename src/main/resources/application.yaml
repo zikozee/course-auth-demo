@@ -35,7 +35,27 @@ spring:
     virtual:
       enabled: true
 
-logging:
-  level:
-    org.springframework.security: debug
-    org.springframework.data: debug
+#logging:
+#  level:
+#    org.springframework.web: info
+#    org.springframework.security: debug
+##    org.springframework.data: debug
+
+private-key:
+  name: authdemo.jks
+  password: ${KEY_PASSWORD:2026Auth}
+  alias: ${KEY_ALIAS:authdemo}
+  # this ensures multiple instances of auth server can decode tokens
+  id: ${KEY_ID:38c85095-49c0-482f-9a7d-f9ce917b76b6}
+
+
+redis:
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
+  database-index: ${REDIS_INDEX:1}
+  connection-timeout: 5000
+  read-timeout: 5000
+  use-ssl: ${REDIS_USE_TLS:false}
+  max:
+    total: 10
+    idle: 2
