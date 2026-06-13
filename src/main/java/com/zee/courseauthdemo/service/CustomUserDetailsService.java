@@ -1,11 +1,15 @@
 package com.zee.courseauthdemo.service;
 
 
+import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2Error;
+import com.zee.courseauthdemo.datatype.ErrorCodeConstants;
 import com.zee.courseauthdemo.dto.CustomUser;
 import com.zee.courseauthdemo.entity.SystemUser;
+import com.zee.courseauthdemo.exception.CustomOAuth2AuthenticationException;
 import com.zee.courseauthdemo.repository.SystemUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -53,7 +57,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         SystemUser systemUser = users.stream()
                 .filter(user -> user.getUsername().equals(username))
                 .findFirst()
-                .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
+                .orElseThrow(() ->
+                        new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.INCORRECT_USERNAME_PASSWORD, "username or password is incorrect", null, HttpStatus.BAD_REQUEST))
+                );
 
 
         if(systemUser.isLocked()){

@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2ErrorAuthenticationFailureHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +60,8 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http,
+                                                                      CustomOAuth2ErrorAuthenticationFailureHandler authenticationFailureHandler) throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
         http
@@ -67,6 +69,9 @@ public class SecurityConfig {
                 .with(authorizationServerConfigurer, authorizationServer ->
                         authorizationServer
                                 .oidc(Customizer.withDefaults())	// Enable OpenID Connect 1.0
+                                .tokenEndpoint(tokenEndpoint ->
+                                        tokenEndpoint.errorResponseHandler(authenticationFailureHandler)
+                                )
                 )
                 .authorizeHttpRequests(authorize ->
                         authorize

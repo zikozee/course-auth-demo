@@ -1,5 +1,9 @@
 package com.zee.courseauthdemo.util;
 
+import com.zee.courseauthdemo.datatype.ErrorCodeConstants;
+import com.zee.courseauthdemo.dto.ApiResponse;
+import com.zee.courseauthdemo.dto.ErrorMessage;
+import com.zee.courseauthdemo.exception.ErrorInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -38,4 +42,22 @@ public final class AuthUtil {
         return uuid.toString();
     }
 
+    public static ApiResponse<?> parseExceptionInfoToResponseDto(MessageSourceUtil messageSourceUtil, ErrorInfo errorInfo) {
+        ErrorMessage em;
+        String newDetailedMessage = errorInfo.getDetailedDescription();
+        try {
+            em = messageSourceUtil.getErrorCodeMessage(errorInfo.getErrorCode(), errorInfo.getPlaceholderValues());
+        } catch (Exception e) {
+            log.debug("Failed to parse exception detail: {}, {}", errorInfo, e.getMessage(), e);
+            newDetailedMessage += ", Second thrown exception is: " + e.getMessage();
+            em = messageSourceUtil.getErrorCodeMessage(ErrorCodeConstants.SOMETHING_WENT_WRONG, (String) null);
+        }
+        return ApiResponse.<String>builder()
+                .successful(false)
+                .messageType(errorInfo.getMessageType())
+                .errorDetailedDescription(newDetailedMessage)
+                .errorCode(em.getErrorCode())
+                .errorMessage(em.getMessage())
+                .build();
+    }
 }

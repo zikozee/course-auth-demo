@@ -1,9 +1,10 @@
 package com.zee.courseauthdemo.config;
 
 
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
@@ -26,5 +27,13 @@ public class AppConfig {
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .build();
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasenames("i18n/message", "i18n/error-code");
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
     }
 }
