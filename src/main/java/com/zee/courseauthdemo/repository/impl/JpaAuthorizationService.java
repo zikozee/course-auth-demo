@@ -65,7 +65,6 @@ public class JpaAuthorizationService implements OAuth2AuthorizationService {
         //tod used JsonMapper in jackson 3
         objectMapper = JsonMapper.builder()
                 .addModule(new CoreJacksonModule())
-//                .addMixIn(SecurityUser.class, SecurityUserMixin.class) //todo add mixin when required
                 .addModules(securityModules)
                 .addModule(new OAuth2AuthorizationServerJacksonModule())
                 .build();
