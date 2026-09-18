@@ -5,6 +5,7 @@ import com.zee.courseauthdemo.config.ConverterUtil;
 import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2Error;
 import com.zee.courseauthdemo.datatype.ErrorCodeConstants;
 import com.zee.courseauthdemo.exception.CustomOAuth2AuthenticationException;
+import com.zee.courseauthdemo.util.AuthConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
@@ -30,7 +31,7 @@ public class CustomGrantAuthenticationConverter implements AuthenticationConvert
     public @Nullable Authentication convert(HttpServletRequest request) {
 
         final String grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
-        if(!grantType.equals("custom_grant")) {
+        if(!grantType.equals(AuthConstants.CUSTOM_GRANT_TYPE)) {
             // i safely assume this Authentication converter is the last on the list else it will block
             // e.g grantType: authorization_code, client_credentials and refresh_token
             // why because I am not returning null instead throwing an exception

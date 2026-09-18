@@ -11,6 +11,8 @@ public final class AuthConstants {
         /* This utility class should not be instantiated */
     }
 
+    public static final String CUSTOM_GRANT_TYPE = "custom_oauth_grant";
+
 
     public static final String USER_SESSION_ID = "userSessionId";
     public static final String USER_ID = "userId";

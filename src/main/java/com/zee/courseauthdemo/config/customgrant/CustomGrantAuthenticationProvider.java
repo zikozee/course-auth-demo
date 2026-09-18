@@ -204,7 +204,7 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
         // delete all old user sessions on login
         authorizationService.deleteUserOldActiveSessions(user.getUsername());
 
-        this.saveAuthorization(authorizationBuilder, authorizedScopes, clientPrincipal, username, sessionId);
+        this.saveAuthorization(authorizationBuilder, authorizedScopes, lightWeightPrincipal, username, sessionId);
         return new OAuth2AccessTokenAuthenticationToken(registeredClient, clientPrincipal, accessToken, refreshToken, additionalParameters);
     }
 
@@ -235,10 +235,10 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
     }
 
     private void saveAuthorization(OAuth2Authorization.Builder authorizationBuilder, Set<String> authorizedScopes,
-                                   Authentication usernamePasswordAuthenticationToken, String username, String sessionId) {
+                                   Authentication principal, String username, String sessionId) {
         OAuth2Authorization authorization = authorizationBuilder
                 .authorizedScopes(authorizedScopes)
-                .attribute(Principal.class.getName(), usernamePasswordAuthenticationToken)
+                .attribute(Principal.class.getName(), principal)
                 .build();
         this.authorizationService.saveWithUserDetails(authorization, username, sessionId);
     }

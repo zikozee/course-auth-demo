@@ -83,4 +83,23 @@ VALUES
     null,
     false,
     null
+),
+(
+    20,
+    10,
+    false,
+    '2026-09-15 13:43:49.961000 +00:00',
+    'client_secret_basic',
+    'custom_oauth_grant,refresh_token',
+    'oidc-client4',
+    '$2a$10$/qFC7mE8LBYHlkhOzXeAzu3p58INAVlCFcsKHV7YDxrLcdrWyTAD6',
+    'openid,profile',
+    'client4',
+    'https://spring.io',
+    'http://127.0.0.1:8080/',
+    'User',
+    null,
+    null,
+    false,
+    null
 ) ON CONFLICT (client_name) DO NOTHING;
