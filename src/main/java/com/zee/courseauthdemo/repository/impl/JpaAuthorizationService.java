@@ -5,8 +5,10 @@ import com.zee.courseauthdemo.entity.Authorization;
 import com.zee.courseauthdemo.repository.AuthorizationRepository;
 import com.zee.courseauthdemo.util.AuthUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.dao.DataRetrievalFailureException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.jackson.CoreJacksonModule;
 import org.springframework.security.jackson.SecurityJacksonModules;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
@@ -23,6 +25,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.jackson.OAuth2AuthorizationServerJacksonModule;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import tools.jackson.core.type.TypeReference;
@@ -72,25 +75,25 @@ public class JpaAuthorizationService implements OAuth2AuthorizationService {
     }
 
     @Override
-    public void save(OAuth2Authorization authorization) {
+    public void save(@NotNull OAuth2Authorization authorization) {
         Assert.notNull(authorization, AUTHORIZATION_NOT_NULL);
         this.authorizationRepository.save(toAuthorizationEntity(authorization, null, null));
     }
 
     @Override
-    public void remove(OAuth2Authorization authorization) {
+    public void remove(@NotNull OAuth2Authorization authorization) {
         Assert.notNull(authorization, AUTHORIZATION_NOT_NULL);
         this.authorizationRepository.deleteById(AuthUtil.fromString(authorization.getId()));
     }
 
     @Override
-    public @Nullable OAuth2Authorization findById(String id) {
+    public @Nullable OAuth2Authorization findById(@NotNull String id) {
         Assert.hasText(id, "id cannot be empty");
         return this.authorizationRepository.findById(AuthUtil.fromString(id)).map(this::fromAuthorizationEntity).orElse(null);
     }
 
     @Override
-    public @Nullable OAuth2Authorization findByToken(String token, @Nullable OAuth2TokenType tokenType) {
+    public @Nullable OAuth2Authorization findByToken(@NotNull String token, @Nullable OAuth2TokenType tokenType) {
         Assert.hasText(token, "token cannot be empty");
 
         Optional<Authorization> result;
@@ -111,6 +114,19 @@ public class JpaAuthorizationService implements OAuth2AuthorizationService {
         }
 
         return result.map(this::fromAuthorizationEntity).orElse(null);
+    }
+
+
+    public void saveWithUserDetails(@NotNull OAuth2Authorization authorization, @Nullable String username, @Nullable String sessionId) {
+        Assert.notNull(authorization, AUTHORIZATION_NOT_NULL);
+        this.authorizationRepository.save(toAuthorizationEntity(authorization, username, sessionId));
+    }
+
+    @Async("taskExecutor")
+    @Transactional
+    public void deleteUserOldActiveSessions(@NotNull String username) {
+        log.info("deleted user old sessions");
+        authorizationRepository.deleteAllPreviousUserSessions(username, Instant.now());
     }
 
     public OAuth2Authorization fromAuthorizationEntity(Authorization entity) {

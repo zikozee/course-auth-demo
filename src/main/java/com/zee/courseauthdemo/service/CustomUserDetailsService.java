@@ -10,7 +10,6 @@ import com.zee.courseauthdemo.repository.SystemUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,18 +32,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public @NotNull UserDetails loadUserByUsername(@NotNull String username) throws UsernameNotFoundException {
 
-        // todo revert once user is now fetched fromDB
         SystemUser systemUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomOAuth2AuthenticationException(
                         new CustomOAuth2Error(ErrorCodeConstants.INCORRECT_USERNAME_PASSWORD, "username or password is incorrect", null, HttpStatus.BAD_REQUEST)
                 ));
-
-
-        if(systemUser.isLocked()){
-            throw new LockedException("Username is locked"); // todo replace with Custom Exception
-        }
-
-
 
         return new CustomUser(
                 systemUser.getId(),
@@ -59,14 +50,5 @@ public class CustomUserDetailsService implements UserDetailsService {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toSet())
         );
-
-
-//        //todo inject users here from a users service
-//
-//        return User.builder()
-//                .username("user")
-//                .password(passwordEncoder.encode("password"))
-//                .authorities("coder")
-//                .build();
     }
 }
