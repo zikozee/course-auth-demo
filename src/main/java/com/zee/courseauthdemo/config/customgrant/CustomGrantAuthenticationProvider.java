@@ -53,9 +53,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class CustomGrantAuthenticationProvider implements AuthenticationProvider {
 
-    private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
-    private static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE = new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
-
 
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
@@ -159,7 +156,7 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
             OAuth2Token generatedRefreshToken = this.tokenGenerator.generate(tokenContext);
             if (generatedRefreshToken != null) {
                  if (!(generatedRefreshToken instanceof OAuth2RefreshToken)) {
-                     throw new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.SERVER_ERROR, "The token generator failed to generate the refresh token.", ERROR_URI, HttpStatus.INTERNAL_SERVER_ERROR));
+                     throw new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.SERVER_ERROR, "The token generator failed to generate the refresh token.", AuthConstants.ERROR_URI, HttpStatus.INTERNAL_SERVER_ERROR));
                  }
                  refreshToken = (OAuth2RefreshToken) generatedRefreshToken;
                  authorizationBuilder.refreshToken(refreshToken);
@@ -176,17 +173,17 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
                             createHash(sessionInformation.getSessionId()), sessionInformation.getLastRequest());
                 } catch (NoSuchAlgorithmException ex) {
                     log.error("error computing hash for session id", ex);
-                    throw new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.SERVER_ERROR, "Failed to compute hash for Session ID.", ERROR_URI, HttpStatus.INTERNAL_SERVER_ERROR));
+                    throw new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.SERVER_ERROR, "Failed to compute hash for Session ID.", AuthConstants.ERROR_URI, HttpStatus.INTERNAL_SERVER_ERROR));
                 }
                 tokenContextBuilder.put(SessionInformation.class, sessionInformation);
             }
             tokenContext = tokenContextBuilder
-                    .tokenType(ID_TOKEN_TOKEN_TYPE)
+                    .tokenType(AuthConstants.ID_TOKEN_TOKEN_TYPE)
                     .authorization(authorizationBuilder.build())
                     .build();
             OAuth2Token generatedIdToken = this.tokenGenerator.generate(tokenContext);
             if (!(generatedIdToken instanceof Jwt)) {
-                throw new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.SERVER_ERROR, "The token generator failed to generate the ID token.", ERROR_URI, HttpStatus.INTERNAL_SERVER_ERROR));
+                throw new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.SERVER_ERROR, "The token generator failed to generate the ID token.", AuthConstants.ERROR_URI, HttpStatus.INTERNAL_SERVER_ERROR));
             }
             idToken = new OidcIdToken(generatedIdToken.getTokenValue(), generatedIdToken.getIssuedAt(),
                     generatedIdToken.getExpiresAt(), ((Jwt) generatedIdToken).getClaims());

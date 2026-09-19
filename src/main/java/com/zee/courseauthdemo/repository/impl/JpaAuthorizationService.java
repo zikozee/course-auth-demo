@@ -116,6 +116,9 @@ public class JpaAuthorizationService implements OAuth2AuthorizationService {
         return result.map(this::fromAuthorizationEntity).orElse(null);
     }
 
+    public Optional<Authorization> findByRefreshToken(@NotNull String refreshToken) {
+        return this.authorizationRepository.findByRefreshTokenValue(refreshToken);
+    }
 
     public void saveWithUserDetails(@NotNull OAuth2Authorization authorization, @Nullable String username, @Nullable String sessionId) {
         Assert.notNull(authorization, AUTHORIZATION_NOT_NULL);

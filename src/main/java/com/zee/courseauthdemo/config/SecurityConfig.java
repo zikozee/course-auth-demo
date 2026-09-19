@@ -9,6 +9,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.zee.courseauthdemo.config.customgrant.CustomGrantAuthenticationConverter;
 import com.zee.courseauthdemo.config.customgrant.CustomGrantAuthenticationProvider;
 import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2ErrorAuthenticationFailureHandler;
+import com.zee.courseauthdemo.config.refreshtoken.CustomRefreshTokenAuthenticationProvider;
 import com.zee.courseauthdemo.repository.impl.JpaAuthorizationService;
 import com.zee.courseauthdemo.service.CustomUserDetailsService;
 import com.zee.courseauthdemo.util.CacheUtil;
@@ -29,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 
 import org.springframework.security.oauth2.server.authorization.token.*;
@@ -84,10 +86,14 @@ public class SecurityConfig {
                                                         converters.add(new CustomGrantAuthenticationConverter())
                                                 )
                                                 .authenticationProviders(providers -> {
+                                                    providers.removeIf(OAuth2RefreshTokenAuthenticationProvider.class::isInstance);
                                                     providers.add(new CustomGrantAuthenticationProvider(
                                                             customUserDetailsService, passwordEncoder,
                                                             tokenGenerator, cacheUtil, authorizationService
                                                     ));
+                                                    providers.add(new CustomRefreshTokenAuthenticationProvider(
+                                                            authorizationService, cacheUtil, tokenGenerator)
+                                                    );
                                                 })
                                                 .errorResponseHandler(authenticationFailureHandler)
                                 )
