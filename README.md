@@ -1,6 +1,7 @@
 # Authorization Code
 http://127.0.0.1:8080/oauth2/authorize?response_type=code&client_id=oidc-client&scope=openid&state=xyz&redirect_uri=https://spring.io
 
+- you can choose to remove state if you don't need it
 ## Flow Steps - see Diagram
 	1.	App redirects user to Authorization Server
 	2.	User logs in & consents
@@ -84,3 +85,7 @@ http://127.0.0.1:8080/oauth2/authorize?response_type=code&client_id=oidc-client2
   - use same app java version to generate the below 
   - keytool -genkeypair -validity 3650 -keysize 2048 -alias authdemo -keyalg RSA -keypass 2026Auth -keystore authdemo.jks -storepass 2026Auth
   - verify token with jwt.io to see private key id (**kid**)
+
+ TODO -- update with the issues to form a complete flow
+
+- mention we can change client-auth-method to client_secret_post
