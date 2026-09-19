@@ -242,8 +242,8 @@ public class CustomRefreshTokenAuthenticationProvider implements AuthenticationP
             idToken = null;
         }
 
-        authorization = authorizationBuilder.build();
-        this.authorizationService.save(authorization);
+        this.saveAuthorization(authorizationBuilder, authorizedScopes, lightWeightPrincipal, optionalAuthorization.get().getUsername(),
+                currentSessionId);
 
         if (log.isTraceEnabled()) {
             log.trace("Saved authorization");
@@ -269,7 +269,14 @@ public class CustomRefreshTokenAuthenticationProvider implements AuthenticationP
         return OAuth2RefreshTokenAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
-
+    private void saveAuthorization(OAuth2Authorization.Builder authorizationBuilder, Set<String> authorizedScopes,
+                                   Authentication lightWeightPrincipal, String username, String sessionId) {
+        OAuth2Authorization authorization = authorizationBuilder
+                .authorizedScopes(authorizedScopes)
+                .attribute(Principal.class.getName(), lightWeightPrincipal)
+                .build();
+        this.authorizationService.saveWithUserDetails(authorization, username, sessionId);
+    }
 
     private static void verifyDPoPProofPublicKey(Jwt dPoPProof, ClaimAccessor accessTokenClaims) {
         JWK jwk = null;
