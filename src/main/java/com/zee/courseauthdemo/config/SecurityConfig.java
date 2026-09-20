@@ -6,7 +6,13 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.zee.courseauthdemo.config.customgrant.CustomGrantAuthenticationConverter;
+import com.zee.courseauthdemo.config.customgrant.CustomGrantAuthenticationProvider;
 import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2ErrorAuthenticationFailureHandler;
+import com.zee.courseauthdemo.config.refreshtoken.CustomRefreshTokenAuthenticationProvider;
+import com.zee.courseauthdemo.repository.impl.JpaAuthorizationService;
+import com.zee.courseauthdemo.service.CustomUserDetailsService;
+import com.zee.courseauthdemo.util.CacheUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,16 +24,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.encrypt.KeyStoreKeyFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -35,7 +41,6 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.UUID;
 
 /**
  * @dev : Ezekiel Eromosei
@@ -61,7 +66,13 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http,
-                                                                      CustomOAuth2ErrorAuthenticationFailureHandler authenticationFailureHandler) throws Exception {
+                                                                      CustomOAuth2ErrorAuthenticationFailureHandler authenticationFailureHandler,
+                                                                      CustomUserDetailsService customUserDetailsService,
+                                                                      PasswordEncoder passwordEncoder,
+                                                                      OAuth2TokenGenerator<?> tokenGenerator,
+                                                                      CacheUtil cacheUtil,
+                                                                      JpaAuthorizationService authorizationService
+                                                                      ) throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
         http
@@ -70,7 +81,21 @@ public class SecurityConfig {
                         authorizationServer
                                 .oidc(Customizer.withDefaults())	// Enable OpenID Connect 1.0
                                 .tokenEndpoint(tokenEndpoint ->
-                                        tokenEndpoint.errorResponseHandler(authenticationFailureHandler)
+                                        tokenEndpoint
+                                                .accessTokenRequestConverters(converters ->
+                                                        converters.add(new CustomGrantAuthenticationConverter())
+                                                )
+                                                .authenticationProviders(providers -> {
+                                                    providers.removeIf(OAuth2RefreshTokenAuthenticationProvider.class::isInstance);
+                                                    providers.add(new CustomGrantAuthenticationProvider(
+                                                            customUserDetailsService, passwordEncoder,
+                                                            tokenGenerator, cacheUtil, authorizationService
+                                                    ));
+                                                    providers.add(new CustomRefreshTokenAuthenticationProvider(
+                                                            authorizationService, cacheUtil, tokenGenerator)
+                                                    );
+                                                })
+                                                .errorResponseHandler(authenticationFailureHandler)
                                 )
                 )
                 .authorizeHttpRequests(authorize ->
@@ -103,67 +128,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-//        UserDetails userDetails = User.builder()
-//                .username("user")
-//                .password(passwordEncoder.encode("password"))
-//                .authorities("coder")
-//                .build();
-//
-//        return new InMemoryUserDetailsManager(userDetails);
-//    }
-
-
-    //each Registered Client must have the grant and type(pkce) configured
-//    @Bean
-//    public RegisteredClientRepository registeredClientRepository() {
-//        RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-//                .clientId("oidc-client")
-//                .clientSecret("{noop}secret")
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//                .redirectUri("https://spring.io")
-//                .postLogoutRedirectUri("http://127.0.0.1:8080/")
-//                .scope(OidcScopes.OPENID)
-//                .scope(OidcScopes.PROFILE)
-//                .clientSettings(ClientSettings.builder()
-//                        .requireAuthorizationConsent(true)
-//                        .requireProofKey(false)
-//                        .build())
-//                .build();
-//
-//        RegisteredClient oidcClientPkce = RegisteredClient.withId(UUID.randomUUID().toString())
-//                .clientId("oidc-client2")
-//                .clientSecret("{noop}secret2") // must be different from above else error is thrown
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-//                .redirectUri("https://spring.io")
-//                .postLogoutRedirectUri("http://127.0.0.1:8080/")
-//                .scope(OidcScopes.OPENID)
-//                .scope(OidcScopes.PROFILE)
-//                .clientSettings(ClientSettings.builder()
-//                        .requireProofKey(true)
-//                        .build())
-//                .build();
-//
-//        RegisteredClient clientCredentials = RegisteredClient.withId(UUID.randomUUID().toString())
-//                .clientId("oidc-client3")
-//                .clientSecret("{noop}secret3") // must be different from above else error is thrown
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-//                .redirectUri("https://spring.io")
-//                .postLogoutRedirectUri("http://127.0.0.1:8080/")
-//                .scope(OidcScopes.OPENID)
-//                .scope(OidcScopes.PROFILE)
-//                .build();
-//
-//
-//        return new InMemoryRegisteredClientRepository(List.of(oidcClient, oidcClientPkce, clientCredentials));
-//    }
-
     @Bean
     JWKSource<SecurityContext> jwkSource() {
         KeyStoreKeyFactory keyStoreKeyFactory =
@@ -186,6 +150,18 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+    }
+
+    //todo - implement JwtCustomizer
+    @Bean
+    OAuth2TokenGenerator<OAuth2Token> tokenGenerator(/*OAuth2TokenCustomizer<JwtEncodingContext> oAuth2TokenCustomizer,*/
+                                                     JWKSource<SecurityContext> jwkSource) {
+
+        JwtGenerator jwtGenerator = new JwtGenerator(new NimbusJwtEncoder(jwkSource));
+//        jwtGenerator.setJwtCustomizer(oAuth2TokenCustomizer);
+        OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
+        OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+        return new DelegatingOAuth2TokenGenerator(jwtGenerator, accessTokenGenerator, refreshTokenGenerator);
     }
 
     @Bean

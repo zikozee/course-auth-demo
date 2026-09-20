@@ -4,7 +4,10 @@ package com.zee.courseauthdemo.config;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
@@ -35,5 +38,15 @@ public class AppConfig {
         messageSource.setBasenames("i18n/message", "i18n/error-code");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
+    }
+
+    @Primary
+    @Bean(name = "taskExecutor")
+    public AsyncTaskExecutor virtualThreadTaskExecutor() {
+        SimpleAsyncTaskExecutor simpleAsyncTaskExecutor = new SimpleAsyncTaskExecutor();
+        simpleAsyncTaskExecutor.setVirtualThreads(true);
+        simpleAsyncTaskExecutor.setThreadNamePrefix("VirtualThread-");
+        return simpleAsyncTaskExecutor;
+
     }
 }

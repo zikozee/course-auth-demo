@@ -15,7 +15,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "authorizations") //authorization is a reserved keyword in postgres
+@Table(name = "authorizations", //authorization is a reserved keyword in postgres
+        indexes = {
+            @Index(name = "idx_auth_access_token", columnList = "access_token_value"),
+            @Index(name = "idx_auth_refresh_token", columnList = "refresh_token_value"),
+            @Index(name = "idx_auth_username", columnList = "username"),
+            @Index(name = "idx_auth_session_id", columnList = "session_id")
+        }
+)
 public class Authorization extends BaseEntity {
 
     @Id
