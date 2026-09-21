@@ -20,6 +20,11 @@ public final class AuthConstants {
     public static final OAuth2TokenType ID_TOKEN_TOKEN_TYPE = new OAuth2TokenType(OidcParameterNames.ID_TOKEN);
     public static final String INVALID_DPOP_PROOF = "invalid_dpop_proof";
 
+    public static final String ACCESS_TOKEN = "accessToken";
+    public static final String REFRESH_TOKEN = "refreshToken";
+    public static final String EXPIRES_IN = "expiresIn";
+    public static final String TOKEN_TYPE = "tokenType";
+
 
     public static final String USER_SESSION_ID = "userSessionId";
     public static final String USER_ID = "userId";

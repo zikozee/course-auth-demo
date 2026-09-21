@@ -34,6 +34,7 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 
 import org.springframework.security.oauth2.server.authorization.token.*;
+import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AccessTokenResponseAuthenticationSuccessHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -95,6 +96,7 @@ public class SecurityConfig {
                                                             authorizationService, cacheUtil, tokenGenerator)
                                                     );
                                                 })
+                                                .accessTokenResponseHandler(new CustomAccessTokenResponseHandler())
                                                 .errorResponseHandler(authenticationFailureHandler)
                                 )
                 )
