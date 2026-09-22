@@ -12,6 +12,7 @@ import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2ErrorAuthent
 import com.zee.courseauthdemo.config.refreshtoken.CustomRefreshTokenAuthenticationProvider;
 import com.zee.courseauthdemo.repository.impl.JpaAuthorizationService;
 import com.zee.courseauthdemo.service.CustomUserDetailsService;
+import com.zee.courseauthdemo.usermanagement.service.UserService;
 import com.zee.courseauthdemo.util.CacheUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,6 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 
 import org.springframework.security.oauth2.server.authorization.token.*;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AccessTokenResponseAuthenticationSuccessHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -72,7 +72,8 @@ public class SecurityConfig {
                                                                       PasswordEncoder passwordEncoder,
                                                                       OAuth2TokenGenerator<?> tokenGenerator,
                                                                       CacheUtil cacheUtil,
-                                                                      JpaAuthorizationService authorizationService
+                                                                      JpaAuthorizationService authorizationService,
+                                                                      UserService userService
                                                                       ) throws Exception {
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
                 new OAuth2AuthorizationServerConfigurer();
@@ -91,7 +92,8 @@ public class SecurityConfig {
                                                     providers.removeIf(OAuth2RefreshTokenAuthenticationProvider.class::isInstance);
                                                     providers.add(new CustomGrantAuthenticationProvider(
                                                             customUserDetailsService, passwordEncoder,
-                                                            tokenGenerator, cacheUtil, authorizationService
+                                                            tokenGenerator, cacheUtil, authorizationService,
+                                                            userService
                                                     ));
                                                     providers.add(new CustomRefreshTokenAuthenticationProvider(
                                                             authorizationService, cacheUtil, tokenGenerator)

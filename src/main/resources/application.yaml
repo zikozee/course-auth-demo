@@ -60,3 +60,5 @@ redis:
   max:
     total: 10
     idle: 2
+
+load-permissions: ${LOAD_PERMISSIONS:true}

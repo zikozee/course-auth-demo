@@ -7,6 +7,8 @@ import com.zee.courseauthdemo.dto.CustomUser;
 import com.zee.courseauthdemo.dto.UserCacheDto;
 import com.zee.courseauthdemo.exception.CustomOAuth2AuthenticationException;
 import com.zee.courseauthdemo.repository.impl.JpaAuthorizationService;
+import com.zee.courseauthdemo.usermanagement.repository.SystemUserRepository;
+import com.zee.courseauthdemo.usermanagement.service.UserService;
 import com.zee.courseauthdemo.util.AuthConstants;
 import com.zee.courseauthdemo.util.CacheUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,6 +47,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @dev : Ezekiel Eromosei
@@ -59,22 +63,26 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
     private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
     private final CacheUtil cacheUtil;
     private final JpaAuthorizationService authorizationService;
+    private final UserService userService;
     private SessionRegistry sessionRegistry;
 
     public CustomGrantAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder,
-                                             OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator, CacheUtil cacheUtil, JpaAuthorizationService authorizationService) {
+                                             OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator, CacheUtil cacheUtil,
+                                             JpaAuthorizationService authorizationService, UserService userService) {
 
         Assert.notNull(userDetailsService, "userDetailsService must not be null");
         Assert.notNull(passwordEncoder, "passwordEncoder must not be null");
         Assert.notNull(tokenGenerator, "tokenGenerator must not be null");
         Assert.notNull(cacheUtil, "cacheUtil must not be null");
         Assert.notNull(authorizationService, "authorizationService must not be null");
+        Assert.notNull(userService, "userRepository must not be null");
 
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.tokenGenerator = tokenGenerator;
         this.cacheUtil = cacheUtil;
         this.authorizationService = authorizationService;
+        this.userService = userService;
     }
 
     @Override
@@ -228,7 +236,23 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
             throw new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.USER_LOCKED, HttpStatus.FORBIDDEN));
         }
 
-        return customUser;
+        List<String> permissions = userService.getUserPermissionsByRole(customUser.getRole());
+        return updateUserPermissions(customUser, permissions);
+    }
+
+    private CustomUser updateUserPermissions(CustomUser customUser, List<String> permissions) {
+        return new CustomUser(
+                customUser.getId(),
+                customUser.getFullName(),
+                customUser.getRole(),
+                customUser.getEmail(),
+                customUser.getUsername(),
+                customUser.getPassword(),
+                customUser.isEnabled(),
+                customUser.isAccountNonLocked(),
+                permissions.stream().map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toSet())
+        );
     }
 
     private void saveAuthorization(OAuth2Authorization.Builder authorizationBuilder, Set<String> authorizedScopes,
