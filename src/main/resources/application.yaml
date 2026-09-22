@@ -62,3 +62,6 @@ redis:
     idle: 2
 
 load-permissions: ${LOAD_PERMISSIONS:true}
+
+public:
+  paths: /actuator/health/readiness,/actuator/health/liveness
