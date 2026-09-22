@@ -1,9 +1,12 @@
 package com.zee.courseauthdemo.usermanagement.setup;
 
 
+import com.zee.courseauthdemo.datatype.ErrorCodeConstants;
+import com.zee.courseauthdemo.datatype.MessageType;
 import com.zee.courseauthdemo.usermanagement.entity.Permission;
 import com.zee.courseauthdemo.usermanagement.entity.Role;
 import com.zee.courseauthdemo.usermanagement.entity.RolePermission;
+import com.zee.courseauthdemo.usermanagement.exception.UserServiceException;
 import com.zee.courseauthdemo.usermanagement.permission.PermissionAccessLevel;
 import com.zee.courseauthdemo.usermanagement.permission.PermissionProvider;
 import com.zee.courseauthdemo.usermanagement.repository.RolePermissionRepository;
@@ -15,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -87,8 +91,7 @@ public class Setup implements CommandLineRunner {
                                 }
                             }catch (Exception ex){
                                 log.error("Error loading permission {}", ex.getMessage());
-                                //todo change to custom permission
-                                throw new RuntimeException("error loading permissions: "+ ex.getLocalizedMessage());
+                                throw new UserServiceException(MessageType.ERROR, ErrorCodeConstants.SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
                             }
                         })
                 );
