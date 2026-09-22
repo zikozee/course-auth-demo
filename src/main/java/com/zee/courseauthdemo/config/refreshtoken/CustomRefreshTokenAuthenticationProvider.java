@@ -47,6 +47,7 @@ import static org.springframework.security.oauth2.core.OAuth2ErrorCodes.INVALID_
 /**
  * @dev : Ezekiel Eromosei
  * @date : 19 Sep, 2026
+ *  * implemented from {@link org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider}
  */
 
 @Slf4j
@@ -153,13 +154,13 @@ public class CustomRefreshTokenAuthenticationProvider implements AuthenticationP
 
         final String currentSessionId = optionalAuthorization.get().getSessionId();
         if(currentSessionId != null){
-            UserCacheDto userCacheDto = cacheUtil.getData(currentSessionId, UserCacheDto.class);
+            UserCacheDto userCacheDto = cacheUtil.getData(AuthConstants.LOGIN_SESSION_CACHE_KEY + currentSessionId, UserCacheDto.class);
             if(userCacheDto == null){
                 throw new CustomOAuth2AuthenticationException(new CustomOAuth2Error(ErrorCodeConstants.INVALID_USER_SESSION, "invalid user session", null, HttpStatus.BAD_REQUEST));
             }
 
             //reactivate user cache
-            cacheUtil.setGenericData(currentSessionId, new UserCacheDto(optionalAuthorization.get().getUsername()), false, 1, TimeUnit.HOURS);
+            cacheUtil.setGenericData(AuthConstants.LOGIN_SESSION_CACHE_KEY + currentSessionId, new UserCacheDto(optionalAuthorization.get().getUsername()), false, 1, TimeUnit.HOURS);
         }
 
 

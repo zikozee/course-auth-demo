@@ -119,7 +119,7 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
         MDC.put(AuthConstants.USER_SESSION_ID, sessionId);
 
         //cache session against user details
-        cacheUtil.setGenericData(sessionId, new UserCacheDto(user.getUsername()), false, 1, TimeUnit.HOURS);
+        cacheUtil.setGenericData(AuthConstants.LOGIN_SESSION_CACHE_KEY + sessionId, new UserCacheDto(user.getUsername()), false, 1, TimeUnit.HOURS);
 
         // include session in principal so it can be injected in the claims
         UsernamePasswordAuthenticationToken lightWeightPrincipal =

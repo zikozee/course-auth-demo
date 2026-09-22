@@ -43,4 +43,8 @@ public interface AuthorizationRepository extends CrudRepository<Authorization, U
     @Modifying
     @Query(nativeQuery = true, value = "DELETE FROM authorizations a WHERE a.access_token_expires_at< CURRENT_TIMESTAMP")
     void deleteAllExpiredAccessToken();
+
+    @Modifying
+    @Query(nativeQuery = true, value = "DELETE FROM authorizations a WHERE a.access_token_value=?1")
+    void deleteAuthRecordOnLogout(String token);
 }

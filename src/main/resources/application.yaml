@@ -36,10 +36,10 @@ spring:
     virtual:
       enabled: true
 
-#logging:
-#  level:
+logging:
+  level:
 #    org.springframework.web: info
-#    org.springframework.security: debug
+    org.springframework.security: debug
 ##    org.springframework.data: debug
 
 private-key:
@@ -65,3 +65,7 @@ load-permissions: ${LOAD_PERMISSIONS:true}
 
 public:
   paths: /actuator/health/readiness,/actuator/health/liveness
+
+custom:
+  logout-endpoint: /v1/logout
+  #/logout clashes with the default web logout hence why /v1/logout

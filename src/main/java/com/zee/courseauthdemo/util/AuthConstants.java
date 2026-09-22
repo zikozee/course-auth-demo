@@ -31,4 +31,5 @@ public final class AuthConstants {
     public static final String USER_SESSION_ID = "userSessionId";
     public static final String USER_ID = "userId";
     public static final String SESSION_ID = "sessionId";
+    public static final String LOGIN_SESSION_CACHE_KEY = "LOGIN_SESSION_CACHE_KEY_";
 }

@@ -8,6 +8,8 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.zee.courseauthdemo.config.customgrant.CustomGrantAuthenticationConverter;
 import com.zee.courseauthdemo.config.customgrant.CustomGrantAuthenticationProvider;
+import com.zee.courseauthdemo.config.logout.CustomOAuth2TokenRevocationAuthenticationConverter;
+import com.zee.courseauthdemo.config.logout.CustomOAuth2TokenRevocationAuthenticationProvider;
 import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2ErrorAuthenticationFailureHandler;
 import com.zee.courseauthdemo.config.refreshtoken.CustomRefreshTokenAuthenticationProvider;
 import com.zee.courseauthdemo.repository.impl.JpaAuthorizationService;
@@ -67,6 +69,9 @@ public class SecurityConfig {
     @Value("${private-key.id}")
     private String privateKeyId;
 
+    @Value("${custom.logout-endpoint}")
+    private String customLogoutEndpoint;
+
 
     @Bean
     @Order(1)
@@ -104,6 +109,16 @@ public class SecurityConfig {
                                                     );
                                                 })
                                                 .accessTokenResponseHandler(new CustomAccessTokenResponseHandler())
+                                                .errorResponseHandler(authenticationFailureHandler)
+                                )
+                                .tokenRevocationEndpoint(revoke ->
+                                        revoke
+                                                .revocationRequestConverter(new CustomOAuth2TokenRevocationAuthenticationConverter())
+                                                .authenticationProvider(
+                                                        new CustomOAuth2TokenRevocationAuthenticationProvider(
+                                                                authorizationService, cacheUtil
+                                                        )
+                                                )
                                                 .errorResponseHandler(authenticationFailureHandler)
                                 )
                 )
@@ -188,9 +203,21 @@ public class SecurityConfig {
         return new DelegatingOAuth2TokenGenerator(jwtGenerator, accessTokenGenerator, refreshTokenGenerator);
     }
 
+
+    /**
+     *  * default revocation endpoint can be found in
+     *  {@link org.springframework.security.oauth2.server.authorization.web.OAuth2TokenRevocationEndpointFilter}
+     */
+
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().build();
+        AuthorizationServerSettings.Builder builder = AuthorizationServerSettings.builder();
+
+        // you can customize token endpoint here
+
+        if(StringUtils.hasText(customLogoutEndpoint))
+            builder.tokenRevocationEndpoint(customLogoutEndpoint);
+        return builder.build();
     }
 
     @Bean

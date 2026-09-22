@@ -120,9 +120,20 @@ public class JpaAuthorizationService implements OAuth2AuthorizationService {
         return this.authorizationRepository.findByRefreshTokenValue(refreshToken);
     }
 
+    public Optional<Authorization> findByAccessToken(@NotNull String accessToken) {
+        return this.authorizationRepository.findByAccessTokenValue(accessToken);
+    }
+
+
     public void saveWithUserDetails(@NotNull OAuth2Authorization authorization, @Nullable String username, @Nullable String sessionId) {
         Assert.notNull(authorization, AUTHORIZATION_NOT_NULL);
         this.authorizationRepository.save(toAuthorizationEntity(authorization, username, sessionId));
+    }
+
+    @Transactional
+    public void deleteAuthRecordOnLogout(@NotNull String token) {
+        log.info("deleting user token record ...");
+        authorizationRepository.deleteAuthRecordOnLogout(token);
     }
 
     @Async("taskExecutor")
