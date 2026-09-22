@@ -6,4 +6,4 @@ package com.zee.courseauthdemo.usermanagement.permission;
  * @date : 21 Sep, 2026
  */
 
-public record CreatePermissionDto(String permission, String description) { }
+public record CreatePermissionDto(String permission, String description, PermissionAccessLevel permissionAccessLevel) { }

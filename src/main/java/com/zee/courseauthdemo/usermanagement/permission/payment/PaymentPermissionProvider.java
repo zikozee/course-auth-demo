@@ -23,7 +23,8 @@ public class PaymentPermissionProvider implements PermissionProvider {
                 .map(permission ->
                         new CreatePermissionDto(
                                 permission.getPermission(),
-                                permission.getDescription()
+                                permission.getDescription(),
+                                permission.getPermissionAccessLevel()
                         )
                 )
                 .collect(Collectors.toSet());
