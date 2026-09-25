@@ -25,6 +25,8 @@ public final class AuthConstants {
     public static final String EXPIRES_IN = "expiresIn";
     public static final String TOKEN_TYPE = "tokenType";
 
+    public static final String GOOGLE_PROVIDER = "google";
+
     public static final String AUTHORITIES = "authorities";
     public static final String IS_SYSTEM_TO_SYSTEM = "isSystemToSystem";
 

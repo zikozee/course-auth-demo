@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class UserService {
     public static final String SYSTEM_USER_CACHE_KEY = "SYSTEM_USER_CACHE_KEY_";
     public static final String ROLE_PERMISSIONS_CACHE_KEY = "ROLE_PERMISSIONS_CACHE_KEY_";
+    public static final String SYSTEM_USER_EMAIL_CACHE_KEY = "SYSTEM_USER_EMAIL_CACHE_KEY_";
 
     private final SystemUserRepository systemUserRepository;
     private final CacheUtil cacheUtil;
@@ -55,6 +57,17 @@ public class UserService {
 
         cacheUtil.setGenericData(ROLE_PERMISSIONS_CACHE_KEY + role, permissions, false, 24, TimeUnit.HOURS);
 
+        return permissions;
+    }
+
+    public List<String> getPermissionsByUsernameOrEmail(String username) {
+        List<String> cachedPermissions = cacheUtil.getDataList(SYSTEM_USER_EMAIL_CACHE_KEY + username, String.class);
+        if(!cachedPermissions.isEmpty()){
+            return cachedPermissions;
+        }
+
+        List<String> permissions = systemUserRepository.getPermissionsByUsernameOrEmail(username);
+        cacheUtil.setGenericData(SYSTEM_USER_EMAIL_CACHE_KEY + username, permissions, false, 24, TimeUnit.HOURS);
         return permissions;
     }
 }
