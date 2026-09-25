@@ -15,6 +15,7 @@ import com.zee.courseauthdemo.config.refreshtoken.CustomRefreshTokenAuthenticati
 import com.zee.courseauthdemo.repository.impl.JpaAuthorizationService;
 import com.zee.courseauthdemo.service.CustomUserDetailsService;
 import com.zee.courseauthdemo.usermanagement.service.UserService;
+import com.zee.courseauthdemo.util.AuthConstants;
 import com.zee.courseauthdemo.util.CacheUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,13 +27,24 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.encrypt.KeyStoreKeyFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationProvider;
@@ -48,6 +60,8 @@ import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @dev : Ezekiel Eromosei
@@ -71,6 +85,8 @@ public class SecurityConfig {
 
     @Value("${custom.logout-endpoint}")
     private String customLogoutEndpoint;
+
+
 
 
     @Bean
@@ -140,10 +156,10 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${public.paths}") String publicPaths) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, @Value("${public.paths}") String publicPaths,
+                                                          OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService) throws Exception {
         http
 //                .formLogin(AbstractHttpConfigurer::disable) // to disable form login if choose to use custom grant alone
-                .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session ->
                         session
@@ -162,7 +178,10 @@ public class SecurityConfig {
                 })
                 // Form login handles the redirect to the login page from the
                 // authorization server filter chain
-                .formLogin(Customizer.withDefaults());
+                .formLogin(Customizer.withDefaults())
+                .oauth2Login(oauth2 ->
+                        oauth2.userInfoEndpoint(userInfo ->
+                                userInfo.oidcUserService(oidcUserService)));
 
         return http.build();
     }
@@ -223,5 +242,47 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * {@link org.springframework.security.config.oauth2.client.CommonOAuth2Provider}
+     */
+    @Bean
+    ClientRegistrationRepository clientRegistrationRepository(
+            @Value("${oauth2.login.google.client-id}") String googleClientId,
+            @Value("${oauth2.login.google.client-secret}") String googleClientSecret) {
+
+        ClientRegistration googleRegistration = CommonOAuth2Provider.GOOGLE
+                .getBuilder(AuthConstants.GOOGLE_PROVIDER)
+                .clientId(googleClientId)
+                .clientSecret(googleClientSecret)
+//                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/google") //already inferred see CommonOAuth2Provider.DEFAULT_REDIRECT_URL
+                .build();
+
+        return new InMemoryClientRegistrationRepository(googleRegistration);
+    }
+
+
+
+    /**
+     *  Resolves issue with AuthenticationTime when generating token in OAuth2AuthorizationCodeAuthenticationProvider during social login
+     */
+    @Bean
+    OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
+
+        OidcUserService delegate = new OidcUserService();
+
+        return userRequest -> {
+            OidcUser user = delegate.loadUser(userRequest);
+            Set<GrantedAuthority> authorities = new HashSet<>(user.getAuthorities());
+            authorities.add(FactorGrantedAuthority.fromFactor(AuthConstants.GOOGLE_PROVIDER));
+
+            return new DefaultOidcUser(
+                    authorities,
+                    user.getIdToken(),
+                    user.getUserInfo(),
+                    IdTokenClaimNames.SUB
+            );
+        };
     }
 }
