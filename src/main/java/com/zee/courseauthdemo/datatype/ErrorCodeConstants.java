@@ -18,6 +18,7 @@ public class ErrorCodeConstants {
     public static final String USER_LOCKED = "AUTH-006";
     public static final String INVALID_SCOPE = "AUTH-007";
     public static final String INVALID_USER_SESSION = "AUTH-008";
+    public static final String USER_NOT_FOUND = "AUTH-009";
 
     public static final String SOMETHING_WENT_WRONG = "AUTH-999";
 

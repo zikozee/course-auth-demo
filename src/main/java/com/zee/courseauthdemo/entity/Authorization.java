@@ -35,7 +35,7 @@ public class Authorization extends BaseEntity {
     private String authorizationGrantType;
     @Column(length = 1000)
     private String authorizedScopes;
-    @Column(length = 4000)
+    @Column(columnDefinition = "TEXT")
     private String attributes;
     @Column(length = 500)
     private String state;
