@@ -47,10 +47,14 @@ public class CustomOAuth2TokenCustomizer implements OAuth2TokenCustomizer<JwtEnc
                 injectSessionIdToClaims(context, authenticationPrincipal);
                 authorities = authenticationPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toSet());
+
+                String username = resolveUsername(authenticationPrincipal);
+                context.getClaims().claim("username", username);
             }
             if(Objects.equals(context.getAuthorizationGrantType(), AuthorizationGrantType.AUTHORIZATION_CODE)){
                 log.info(new ObjectMapper().writeValueAsString(authenticationPrincipal));
                 String username = resolveUsername(authenticationPrincipal);
+                context.getClaims().claim("username", username);
 
                 List<String> permissions = userService.getPermissionsByUsernameOrEmail(username);
                 authorities = new HashSet<>(permissions);

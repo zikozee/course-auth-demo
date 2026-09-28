@@ -24,6 +24,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
@@ -32,6 +33,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.FactorGrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.encrypt.KeyStoreKeyFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,6 +53,7 @@ import org.springframework.security.oauth2.server.authorization.authentication.O
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 
 import org.springframework.security.oauth2.server.authorization.token.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
@@ -61,7 +64,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @dev : Ezekiel Eromosei
@@ -70,6 +75,7 @@ import java.util.Set;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     @Value("${private-key.name}")
     private String privateKeyName;
@@ -181,7 +187,10 @@ public class SecurityConfig {
                 .formLogin(Customizer.withDefaults())
                 .oauth2Login(oauth2 ->
                         oauth2.userInfoEndpoint(userInfo ->
-                                userInfo.oidcUserService(oidcUserService)));
+                                userInfo.oidcUserService(oidcUserService)))
+                .oauth2ResourceServer(resourceServer ->
+                        resourceServer.jwt(Customizer.withDefaults())
+                );
 
         return http.build();
     }
@@ -210,6 +219,17 @@ public class SecurityConfig {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
+
+    @Bean //this is auto injected into the jwt customizer
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            List<String> authorities = jwt.getClaim(AuthConstants.AUTHORITIES);
+            return authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+        });
+
+        return jwtAuthenticationConverter;
+    }
 
     @Bean
     OAuth2TokenGenerator<OAuth2Token> tokenGenerator(OAuth2TokenCustomizer<JwtEncodingContext> oAuth2TokenCustomizer,

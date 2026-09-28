@@ -21,6 +21,8 @@ public interface SystemUserRepository extends CrudRepository<SystemUser, Long> {
 
    Optional<SystemUser> findByUsername(String username);
 
+   Optional<SystemUser> findByUsernameOrEmail(String username, String email);
+
    @Query(nativeQuery = true, value = """
         SELECT p.NAME FROM PERMISSION p WHERE p.ID IN (SELECT rp.PERM_ID
         FROM ROLE_PERMISSION rp

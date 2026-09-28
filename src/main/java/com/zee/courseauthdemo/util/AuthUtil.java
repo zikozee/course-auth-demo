@@ -1,12 +1,20 @@
 package com.zee.courseauthdemo.util;
 
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTParser;
 import com.zee.courseauthdemo.datatype.ErrorCodeConstants;
 import com.zee.courseauthdemo.dto.ApiResponse;
 import com.zee.courseauthdemo.dto.ErrorMessage;
 import com.zee.courseauthdemo.exception.ErrorInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import java.util.UUID;
 
@@ -60,4 +68,31 @@ public final class AuthUtil {
                 .errorMessage(em.getMessage())
                 .build();
     }
+
+    public static String getUserNameFromJwtAuthenticationToken(JwtAuthenticationToken jwtAuthenticationToken) {
+        final String token = jwtAuthenticationToken.getToken().getTokenValue();
+        return getValueFromAccessToken(token, "username");
+    }
+
+    public static String getValueFromAccessToken(String token, String key) {
+        JSONObject jwtObject = jwtJsonObject(token);
+        if(jwtObject != null){
+            return jwtObject.getString(key);
+        }
+        return null;
+    }
+
+    public static JSONObject jwtJsonObject(String token){
+        try {
+            if(org.springframework.util.StringUtils.hasText(token)){
+                JWT jwt = JWTParser.parse(token);
+                return new JSONObject(jwt.getJWTClaimsSet().getClaims());
+            }
+            return null;
+        }catch (Exception _){
+            return null;
+        }
+    }
+
+
 }

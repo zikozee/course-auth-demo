@@ -3,17 +3,23 @@ package com.zee.courseauthdemo.usermanagement.service;
 
 import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2Error;
 import com.zee.courseauthdemo.datatype.ErrorCodeConstants;
+import com.zee.courseauthdemo.datatype.MessageType;
 import com.zee.courseauthdemo.exception.CustomOAuth2AuthenticationException;
+import com.zee.courseauthdemo.usermanagement.dto.ChangePasswordDto;
 import com.zee.courseauthdemo.usermanagement.entity.SystemUser;
+import com.zee.courseauthdemo.usermanagement.exception.UserServiceException;
 import com.zee.courseauthdemo.usermanagement.repository.SystemUserRepository;
+import com.zee.courseauthdemo.util.AuthUtil;
 import com.zee.courseauthdemo.util.CacheUtil;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -31,6 +37,8 @@ public class UserService {
 
     private final SystemUserRepository systemUserRepository;
     private final CacheUtil cacheUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final Validator validator;
 
 
     public SystemUser findByUsername(String username) {
@@ -69,5 +77,46 @@ public class UserService {
         List<String> permissions = systemUserRepository.getPermissionsByUsernameOrEmail(username);
         cacheUtil.setGenericData(SYSTEM_USER_EMAIL_CACHE_KEY + username, permissions, false, 24, TimeUnit.HOURS);
         return permissions;
+    }
+
+
+    // exception is different
+    public SystemUser findByUsernameForUserManagement(String username) {
+        SystemUser cachedSystemUser = cacheUtil.getData(SYSTEM_USER_CACHE_KEY + username, SystemUser.class);
+        if(cachedSystemUser != null){
+            return cachedSystemUser;
+        }
+
+        SystemUser systemUser = systemUserRepository.findByUsernameOrEmail(username, username)
+                .orElseThrow(() -> new UserServiceException(MessageType.ERROR, ErrorCodeConstants.USER_NOT_FOUND, HttpStatus.BAD_REQUEST));
+
+        cacheUtil.setGenericData(SYSTEM_USER_CACHE_KEY + username, systemUser, false, 24, TimeUnit.HOURS);
+        return systemUser;
+    }
+
+
+    // encrypt your password with a public key
+    public void changePassword(ChangePasswordDto changePasswordDto, JwtAuthenticationToken authenticationToken){
+        if(changePasswordDto.oldPassword().equals(changePasswordDto.newPassword())){
+            throw new UserServiceException(MessageType.ERROR, ErrorCodeConstants.OLD_NEW_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
+
+        String username = AuthUtil.getUserNameFromJwtAuthenticationToken(authenticationToken);
+        if(username == null){
+            throw new UserServiceException(MessageType.ERROR, ErrorCodeConstants.INVALID_TOKEN, HttpStatus.UNAUTHORIZED);
+        }
+
+        SystemUser systemUser = this.findByUsernameForUserManagement(username);
+        boolean isMatch = passwordEncoder.matches(changePasswordDto.oldPassword().trim(), systemUser.getHashPassword());
+
+        if(!isMatch){
+            throw new UserServiceException(MessageType.ERROR, ErrorCodeConstants.CREDENTIALS, HttpStatus.BAD_REQUEST);
+        }else {
+            cacheUtil.removeKey(SYSTEM_USER_CACHE_KEY + username);
+            String encode = passwordEncoder.encode(changePasswordDto.newPassword().trim());
+            systemUser.setHashPassword(encode);
+            SystemUser updatedUser = systemUserRepository.save(systemUser);
+            log.info("username: {} password changed successfully", updatedUser.getUsername());
+        }
     }
 }
