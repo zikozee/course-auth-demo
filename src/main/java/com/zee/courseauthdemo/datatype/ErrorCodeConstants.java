@@ -7,6 +7,7 @@ package com.zee.courseauthdemo.datatype;
  */
 
 public class ErrorCodeConstants {
+
     private ErrorCodeConstants() {}
 
 
@@ -19,6 +20,9 @@ public class ErrorCodeConstants {
     public static final String INVALID_SCOPE = "AUTH-007";
     public static final String INVALID_USER_SESSION = "AUTH-008";
     public static final String USER_NOT_FOUND = "AUTH-009";
+    public static final String CREDENTIALS = "AUTH-010";
+    public static final String INVALID_USER_INPUT = "AUTH-011";
+    public static final String OLD_NEW_PASSWORD = "AUTH-012";
 
     public static final String SOMETHING_WENT_WRONG = "AUTH-999";
 
