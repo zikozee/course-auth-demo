@@ -39,4 +39,6 @@ public class Client extends BaseEntity {
     @Column(name="refresh_token_ttl", length = 2)
     private int refreshTokenTimeToLiveInMinutes;
     private boolean requiresProofKey;
+    @Column(columnDefinition = "TEXT")
+    private String audience;
 }
