@@ -24,7 +24,8 @@ INSERT INTO public.client (
     updated_by,
     updated_date,
     deleted,
-    deleted_date
+    deleted_date,
+    audience
 )
 VALUES
 (
@@ -44,7 +45,8 @@ VALUES
     null,
     null,
     false,
-    null
+    null,
+    'payment-service,reporting-service'
 ),
 (
     20,
@@ -63,7 +65,8 @@ VALUES
     null,
     null,
     false,
-    null
+    null,
+    'payment-service,reporting-service'
 ),
 (
     20,
@@ -82,7 +85,8 @@ VALUES
     null,
     null,
     false,
-    null
+    null,
+    'payment-service,reporting-service'
 ),
 (
     20,
@@ -101,5 +105,6 @@ VALUES
     null,
     null,
     false,
-    null
+    null,
+    'payment-service,reporting-service'
 ) ON CONFLICT (client_name) DO NOTHING;

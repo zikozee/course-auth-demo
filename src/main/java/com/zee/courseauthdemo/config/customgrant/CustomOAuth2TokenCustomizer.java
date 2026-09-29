@@ -1,6 +1,7 @@
 package com.zee.courseauthdemo.config.customgrant;
 
 
+import com.zee.courseauthdemo.service.ClientService;
 import com.zee.courseauthdemo.usermanagement.permission.system.SystemPermissionSource;
 import com.zee.courseauthdemo.usermanagement.service.UserService;
 import com.zee.courseauthdemo.util.AuthConstants;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CustomOAuth2TokenCustomizer implements OAuth2TokenCustomizer<JwtEncodingContext> {
     private final UserService userService;
+    private final ClientService clientService;
 
     @Override
     public void customize(JwtEncodingContext context) {
@@ -63,6 +65,9 @@ public class CustomOAuth2TokenCustomizer implements OAuth2TokenCustomizer<JwtEnc
         context.getClaims().claim(AuthConstants.AUTHORITIES, authorities);
         context.getClaims().claim(AuthConstants.IS_SYSTEM_TO_SYSTEM, String.valueOf(Objects.equals(context.getAuthorizationGrantType(), AuthorizationGrantType.CLIENT_CREDENTIALS)));
 
+        //override audience
+        List<String> audiences = clientService.getAudiencesByClientId(context.getRegisteredClient().getClientId());
+        context.getClaims().audience(audiences);
     }
 
     private void injectSessionIdToClaims(JwtEncodingContext context, Authentication authenticationPrincipal) {
