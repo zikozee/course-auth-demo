@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.jackson.CoreJacksonModule;
 import org.springframework.security.jackson.SecurityJacksonModules;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
@@ -124,10 +123,12 @@ public class JpaAuthorizationService implements OAuth2AuthorizationService {
         return this.authorizationRepository.findByAccessTokenValue(accessToken);
     }
 
-
+    @Transactional
     public void saveWithUserDetails(@NotNull OAuth2Authorization authorization, @Nullable String username, @Nullable String sessionId) {
         Assert.notNull(authorization, AUTHORIZATION_NOT_NULL);
-        this.authorizationRepository.save(toAuthorizationEntity(authorization, username, sessionId));
+        //saveAndFlush as persistent context may still be holding data when flush is called
+        Authorization savedAuth = this.authorizationRepository.saveAndFlush(toAuthorizationEntity(authorization, username, sessionId));
+        authorizationRepository.deleteAllPreviousUserSessions(username, savedAuth.getId());
     }
 
     @Transactional
@@ -136,12 +137,6 @@ public class JpaAuthorizationService implements OAuth2AuthorizationService {
         authorizationRepository.deleteAuthRecordOnLogout(token);
     }
 
-    @Async("taskExecutor")
-    @Transactional
-    public void deleteUserOldActiveSessions(@NotNull String username) {
-        log.info("deleted user old sessions");
-        authorizationRepository.deleteAllPreviousUserSessions(username, Instant.now());
-    }
 
     public OAuth2Authorization fromAuthorizationEntity(Authorization entity) {
         RegisteredClient registeredClient = this.registeredClientRepository.findById(entity.getRegisteredClientId());

@@ -7,13 +7,11 @@ import com.zee.courseauthdemo.dto.CustomUser;
 import com.zee.courseauthdemo.dto.UserCacheDto;
 import com.zee.courseauthdemo.exception.CustomOAuth2AuthenticationException;
 import com.zee.courseauthdemo.repository.impl.JpaAuthorizationService;
-import com.zee.courseauthdemo.usermanagement.repository.SystemUserRepository;
 import com.zee.courseauthdemo.usermanagement.service.UserService;
 import com.zee.courseauthdemo.util.AuthConstants;
 import com.zee.courseauthdemo.util.CacheUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -114,10 +112,6 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
         CustomUser user = this.login(username, password);
         final String sessionId = UUID.randomUUID().toString();
 
-        //todo add username and session id to MDC for logging/tracing
-        MDC.put(AuthConstants.USER_ID, user.getUsername());
-        MDC.put(AuthConstants.USER_SESSION_ID, sessionId);
-
         //cache session against user details
         cacheUtil.setGenericData(AuthConstants.LOGIN_SESSION_CACHE_KEY + sessionId, new UserCacheDto(user.getUsername()), false, 1, TimeUnit.HOURS);
 
@@ -205,9 +199,6 @@ public class CustomGrantAuthenticationProvider implements AuthenticationProvider
         if (idToken != null) {
             additionalParameters.put(OidcParameterNames.ID_TOKEN, idToken.getTokenValue());
         }
-
-        // delete all old user sessions on login
-        authorizationService.deleteUserOldActiveSessions(user.getUsername());
 
         this.saveAuthorization(authorizationBuilder, authorizedScopes, lightWeightPrincipal, username, sessionId);
         return new OAuth2AccessTokenAuthenticationToken(registeredClient, clientPrincipal, accessToken, refreshToken, additionalParameters);

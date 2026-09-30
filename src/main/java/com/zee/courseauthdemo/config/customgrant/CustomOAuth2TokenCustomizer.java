@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
@@ -51,17 +52,25 @@ public class CustomOAuth2TokenCustomizer implements OAuth2TokenCustomizer<JwtEnc
                         .collect(Collectors.toSet());
 
                 String username = resolveUsername(authenticationPrincipal);
-                context.getClaims().claim("username", username);
+                context.getClaims().claim(AuthConstants.USERNAME, username);
             }
             if(Objects.equals(context.getAuthorizationGrantType(), AuthorizationGrantType.AUTHORIZATION_CODE)){
-                log.info(new ObjectMapper().writeValueAsString(authenticationPrincipal));
                 String username = resolveUsername(authenticationPrincipal);
-                context.getClaims().claim("username", username);
+                context.getClaims().claim(AuthConstants.USERNAME, username);
 
                 List<String> permissions = userService.getPermissionsByUsernameOrEmail(username);
                 authorities = new HashSet<>(permissions);
             }
+            if(Objects.equals(context.getAuthorizationGrantType(), AuthorizationGrantType.REFRESH_TOKEN)){
+                final String username = resolveUsername(authenticationPrincipal);
+
+                final List<String> permissions = userService.getPermissionsByUsernameOrEmail(username);
+                authorities = new HashSet<>(permissions);
+
+                context.getClaims().claim(AuthConstants.USERNAME, username);
+            }
         }
+
         context.getClaims().claim(AuthConstants.AUTHORITIES, authorities);
         context.getClaims().claim(AuthConstants.IS_SYSTEM_TO_SYSTEM, String.valueOf(Objects.equals(context.getAuthorizationGrantType(), AuthorizationGrantType.CLIENT_CREDENTIALS)));
 

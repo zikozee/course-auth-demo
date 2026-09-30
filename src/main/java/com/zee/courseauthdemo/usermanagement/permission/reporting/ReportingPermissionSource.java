@@ -15,8 +15,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ReportingPermissionSource implements PermissionSource {
 
-    INITIATE(ReportingPermission.VIEW_PAYMENT, "View payments", PermissionAccessLevel.USER),
-    STATUS(ReportingPermission.VIEW_USERS, "View Users", PermissionAccessLevel.USER);
+    VIEW_PAYMENT(ReportingPermission.VIEW_PAYMENT, "View payments", PermissionAccessLevel.USER),
+    VIEW_USERS(ReportingPermission.VIEW_USERS, "View Users", PermissionAccessLevel.USER);
 
     private final String permission;
     private final String description;

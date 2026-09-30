@@ -16,8 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.core.*;
@@ -164,15 +164,25 @@ public class CustomRefreshTokenAuthenticationProvider implements AuthenticationP
         }
 
 
-        UsernamePasswordAuthenticationToken lightWeightPrincipal =  authorization.getAttribute(Principal.class.getName());
-        HashMap<String, Object> details = new HashMap<>();
-        details.put(AuthConstants.SESSION_ID, currentSessionId);
-        lightWeightPrincipal.setDetails(details);
+        Authentication principal = authorization.getAttribute(Principal.class.getName());
+        assert principal != null;
+        if (principal instanceof AbstractAuthenticationToken authenticationToken) {
+            Map<String, Object> details = new HashMap<>();
+            if (authenticationToken.getDetails() instanceof Map<?, ?> existing) {
+                existing.forEach((key, value) -> {
+                    if (key instanceof String stringKey) {
+                        details.put(stringKey, value);
+                    }
+                });
+            }
+            details.put(AuthConstants.SESSION_ID, currentSessionId);
+            authenticationToken.setDetails(details);
+        }
 
 
         DefaultOAuth2TokenContext.Builder tokenContextBuilder = DefaultOAuth2TokenContext.builder()
                 .registeredClient(registeredClient)
-                .principal(lightWeightPrincipal)
+                .principal(principal)
                 .authorizationServerContext(AuthorizationServerContextHolder.getContext())
                 .authorization(authorization)
                 .authorizedScopes(scopes)
@@ -243,7 +253,7 @@ public class CustomRefreshTokenAuthenticationProvider implements AuthenticationP
             idToken = null;
         }
 
-        this.saveAuthorization(authorizationBuilder, authorizedScopes, lightWeightPrincipal, optionalAuthorization.get().getUsername(),
+        this.saveAuthorization(authorizationBuilder, authorizedScopes, principal, optionalAuthorization.get().getUsername(),
                 currentSessionId);
 
         if (log.isTraceEnabled()) {

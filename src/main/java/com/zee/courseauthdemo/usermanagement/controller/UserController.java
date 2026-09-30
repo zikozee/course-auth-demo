@@ -1,6 +1,8 @@
 package com.zee.courseauthdemo.usermanagement.controller;
 
 
+import com.zee.courseauthdemo.datatype.MessageType;
+import com.zee.courseauthdemo.dto.ApiResponse;
 import com.zee.courseauthdemo.usermanagement.dto.ChangePasswordDto;
 import com.zee.courseauthdemo.usermanagement.permission.user.UserPermission;
 import com.zee.courseauthdemo.usermanagement.service.UserService;
@@ -34,8 +36,15 @@ public class UserController {
 
     @PreAuthorize(value = "hasAuthority('" + UserPermission.CHANGE_PASSWORD + "')")
     @PostMapping(path = "change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, String>> changePassword(@Valid @RequestBody ChangePasswordDto changePasswordDto, JwtAuthenticationToken authenticationToken){
+    public ResponseEntity<ApiResponse<Map<String, String>>> changePassword(@Valid @RequestBody ChangePasswordDto changePasswordDto, JwtAuthenticationToken authenticationToken){
         userService.changePassword(changePasswordDto, authenticationToken);
-        return new ResponseEntity<>(Map.of("message", "password changed successfully"), HttpStatus.OK);
+        return new ResponseEntity<>(
+                ApiResponse.<Map<String, String>>builder()
+                        .successful(true)
+                        .messageType(MessageType.SUCCESS)
+                        .data(Map.of("message", "password changed successfully"))
+                        .build(),
+                HttpStatus.OK
+        );
     }
 }

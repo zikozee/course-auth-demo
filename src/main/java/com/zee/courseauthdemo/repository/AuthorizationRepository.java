@@ -1,6 +1,7 @@
 package com.zee.courseauthdemo.repository;
 
 import com.zee.courseauthdemo.entity.Authorization;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -18,7 +19,7 @@ import java.util.UUID;
  */
 
 @Repository
-public interface AuthorizationRepository extends CrudRepository<Authorization, UUID> {
+public interface AuthorizationRepository extends JpaRepository<Authorization, UUID> {
 
     Optional<Authorization> findByState(String state);
     Optional<Authorization> findByAuthorizationCodeValue(String authorizationCode);
@@ -37,8 +38,11 @@ public interface AuthorizationRepository extends CrudRepository<Authorization, U
 
 
     @Modifying
-    @Query(nativeQuery = true, value = "DELETE FROM authorizations a WHERE a.username=?1 and a.access_token_issued_at < ?2")
-    void deleteAllPreviousUserSessions(String username, Instant accessTokenIssuedAtBefore);
+    @Query(nativeQuery = true, value = """
+        DELETE FROM authorizations a
+        WHERE (a.username=:username or a.principal_name=:username) and a.id <> :currentAuthorizationId
+      """)
+    void deleteAllPreviousUserSessions(@Param("username") String username, @Param("currentAuthorizationId") UUID currentAuthorizationId);
 
     @Modifying
     @Query(nativeQuery = true, value = "DELETE FROM authorizations a WHERE a.access_token_expires_at< CURRENT_TIMESTAMP")

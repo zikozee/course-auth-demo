@@ -24,6 +24,7 @@ public final class AuthConstants {
     public static final String REFRESH_TOKEN = "refreshToken";
     public static final String EXPIRES_IN = "expiresIn";
     public static final String TOKEN_TYPE = "tokenType";
+    public static final String USERNAME = "username";
 
     public static final String GOOGLE_PROVIDER = "google";
 
