@@ -3,6 +3,7 @@ package com.zee.courseauthdemo.service;
 
 import com.zee.courseauthdemo.config.oauth2errorhandler.CustomOAuth2Error;
 import com.zee.courseauthdemo.datatype.ErrorCodeConstants;
+import com.zee.courseauthdemo.dto.ClientResponse;
 import com.zee.courseauthdemo.entity.Client;
 import com.zee.courseauthdemo.exception.CustomOAuth2AuthenticationException;
 import com.zee.courseauthdemo.repository.ClientRepository;
@@ -48,5 +49,34 @@ public class ClientService {
         List<String> audiences = Arrays.asList(optionalClient.get().getAudience().split(","));
         cacheUtil.setGenericData(AUDIENCE_CACHE_KEY + clientId, audiences, false, 24, TimeUnit.HOURS);
         return audiences;
+    }
+
+    public ClientResponse getAllClients(){
+
+        return new ClientResponse(
+                clientRepository.findAll()
+                        .stream()
+                        .map(client ->
+                                ClientResponse.ClientDto.builder()
+                                        .clientId(client.getClientId())
+                                        .clientName(client.getClientName())
+                                        .authenticationMethods(toList(client.getClientAuthenticationMethods()))
+                                        .grantTypes(toList(client.getAuthorizationGrantTypes()))
+                                        .redirectUris(toList(client.getRedirectUris()))
+                                        .postLogoutRedirectUris(toList(client.getPostLogoutRedirectUris()))
+                                        .scopes(toList(client.getScopes()))
+                                        .accessTokenTtL(client.getAccessTokenTimeToLiveInMinutes())
+                                        .refreshTokenTtl(client.getRefreshTokenTimeToLiveInMinutes())
+                                        .requiresProofKey(client.isRequiresProofKey())
+                                        .audience(toList(client.getAudience()))
+                                        .build()
+                        )
+                        .toList()
+        );
+    }
+
+
+    private List<String> toList(String data){
+        return Arrays.asList(data.split(","));
     }
 }

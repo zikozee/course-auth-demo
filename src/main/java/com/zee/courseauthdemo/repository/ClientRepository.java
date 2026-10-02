@@ -1,7 +1,7 @@
 package com.zee.courseauthdemo.repository;
 
 import com.zee.courseauthdemo.entity.Client;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -12,6 +12,6 @@ import java.util.Optional;
  */
 
 @Repository
-public interface ClientRepository extends CrudRepository<Client, Long> {
+public interface ClientRepository extends ListCrudRepository<Client, Long> {
     Optional<Client> findByClientId(String clientId);
 }
