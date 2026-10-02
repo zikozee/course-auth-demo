@@ -278,6 +278,7 @@ public class SecurityConfig {
                 .clientSecret(googleClientSecret)
 //                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/google") //already inferred see CommonOAuth2Provider.DEFAULT_REDIRECT_URL
                 .build();
+        // see auth-server guide in cd .. on how google client-id and google client-secret was created
 
         return new InMemoryClientRegistrationRepository(googleRegistration);
     }
