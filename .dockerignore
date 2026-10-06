@@ -1,0 +1,6 @@
+# This image uses a prebuilt JAR; exclude everything else.
+**
+!Dockerfile
+!.dockerignore
+!target/
+!target/*.jar

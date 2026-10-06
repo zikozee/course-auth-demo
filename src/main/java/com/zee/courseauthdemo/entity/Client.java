@@ -12,7 +12,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "client")
+@Table(name = "client", indexes = {
+        @Index(name = "ux_client_client_id", columnList = "client_id", unique = true)
+})
 public class Client extends BaseEntity {
 
     @Id

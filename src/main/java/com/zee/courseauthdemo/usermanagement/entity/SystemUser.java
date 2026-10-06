@@ -1,6 +1,7 @@
 package com.zee.courseauthdemo.usermanagement.entity;
 
 
+import com.zee.courseauthdemo.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-public class SystemUser {
+public class SystemUser extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
