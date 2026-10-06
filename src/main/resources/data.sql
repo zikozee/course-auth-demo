@@ -1,11 +1,24 @@
-INSERT INTO public.users (deleted, enabled, locked, created_date, deleted_date, updated_date, created_by, role, updated_by, password, username, email, full_name)
-
-VALUES (false, true, false, '2026-09-15 13:39:42.793000 +00:00', null,
-        null, 'User', 'Regular', 'User',
+INSERT INTO public.users (
+    deleted, enabled, locked, created_date, deleted_date, updated_date,
+    created_by, role, updated_by, password, username, email, full_name
+)
+VALUES
+    (
+        false, true, false,
+        '2026-09-15 13:39:42.793000 +00:00', NULL, NULL,
+        'Admin', 'SUPER_ADMIN', 'admin',
         '$2a$10$8Pu5NY8kJy3BIli2oo4/tOjTWP2Jh2sohi/tgge6gp0VT2giEFjxq',
-        'user', 'test@test.com', 'Some User') ON CONFLICT (username) DO NOTHING;
+        'admin', 'test@test.com', 'Some User'
+    ),
+    (
+        false, true, false,
+        '2026-09-15 13:39:42.793000 +00:00', NULL, NULL,
+        'user', 'REGULAR_USER', 'user',
+        '$2a$10$V6SdOw3tVXxb8PP0oJ21XuNpAbTstOtJvIx6vcVct42QMrvf7IPVm',
+        'user', 'courseoauth2@gmail.com', 'Zee Ziko'
+    )
+ON CONFLICT (username) DO NOTHING;
 
--- encoded password = password
 
 INSERT INTO public.client (
     access_token_ttl,
@@ -28,83 +41,84 @@ INSERT INTO public.client (
     audience
 )
 VALUES
-(
-    20,
-    10,
-    true,
-    '2026-09-15 13:43:49.961000 +00:00',
-    'client_secret_basic',
-    'authorization_code,refresh_token',
-    'oidc-client2',
-    '$2a$10$QAFM5t3w/qEmilHZ6OFDGukOTGHQX6qkyXmXRgnShxZrbS8NErofO',
-    'openid,profile',
-    'client2',
-    'http://127.0.0.1:5173/pkce/callback',
-    'http://127.0.0.1:8080/',
-    'User',
-    null,
-    null,
-    false,
-    null,
-    'payment-service,reporting-service'
-),
-(
-    20,
-    10,
-    false,
-    '2026-09-15 13:43:49.961000 +00:00',
-    'client_secret_basic',
-    'client_credentials',
-    'oidc-client3',
-    '$2a$10$Lhfi764oqNwaaBF/e9aW0.TmUkbKFrO16i12Vw0R0YtL2dSB.F.jK',
-    'openid,profile',
-    'client3',
-    'https://spring.io',
-    'http://127.0.0.1:8080/',
-    'User',
-    null,
-    null,
-    false,
-    null,
-    'payment-service,reporting-service'
-),
-(
-    20,
-    10,
-    false,
-    '2026-09-15 13:43:49.961000 +00:00',
-    'client_secret_basic',
-    'authorization_code,refresh_token',
-    'oidc-client',
-    '$2a$10$QNJ/yzQtiWhrsdFWq0jA4uU/DmP/X71uiddK9/v1KwPYrYfFYCh2K',
-    'openid,profile',
-    'client1',
-    'http://127.0.0.1:5173/authorization-code/callback',
-    'http://127.0.0.1:8080/',
-    'User',
-    null,
-    null,
-    false,
-    null,
-    'payment-service,reporting-service'
-),
-(
-    20,
-    10,
-    false,
-    '2026-09-15 13:43:49.961000 +00:00',
-    'client_secret_basic',
-    'custom_oauth_grant,refresh_token',
-    'oidc-client4',
-    '$2a$10$/qFC7mE8LBYHlkhOzXeAzu3p58INAVlCFcsKHV7YDxrLcdrWyTAD6',
-    'openid,profile',
-    'client4',
-    'https://spring.io',
-    'http://127.0.0.1:8080/',
-    'User',
-    null,
-    null,
-    false,
-    null,
-    'payment-service,reporting-service'
-) ON CONFLICT (client_name) DO NOTHING;
+    (
+        20,
+        10,
+        false,
+        '2026-09-15 13:43:49.961000 +00:00',
+        'client_secret_basic',
+        'authorization_code,refresh_token',
+        'oidc-client',
+        '$2a$10$QNJ/yzQtiWhrsdFWq0jA4uU/DmP/X71uiddK9/v1KwPYrYfFYCh2K',
+        'openid,profile',
+        'client1',
+        'http://127.0.0.1:5173/callback',
+        'http://127.0.0.1:8080/',
+        'User',
+        NULL,
+        NULL,
+        false,
+        NULL,
+        'payment-service,reporting-service'
+    ),
+    (
+        20,
+        10,
+        true,
+        '2026-09-15 13:43:49.961000 +00:00',
+        'client_secret_basic',
+        'authorization_code,refresh_token',
+        'oidc-client2',
+        '$2a$10$QAFM5t3w/qEmilHZ6OFDGukOTGHQX6qkyXmXRgnShxZrbS8NErofO',
+        'openid,profile',
+        'client2',
+        'http://127.0.0.1:5173/callback',
+        'http://127.0.0.1:8080/',
+        'User',
+        NULL,
+        NULL,
+        false,
+        NULL,
+        'payment-service,reporting-service'
+    ),
+    (
+        20,
+        10,
+        false,
+        '2026-09-15 13:43:49.961000 +00:00',
+        'client_secret_basic',
+        'custom_oauth_grant,refresh_token',
+        'oidc-client4',
+        '$2a$10$/qFC7mE8LBYHlkhOzXeAzu3p58INAVlCFcsKHV7YDxrLcdrWyTAD6',
+        'openid,profile',
+        'client4',
+        'https://spring.io',
+        'http://127.0.0.1:8080/',
+        'User',
+        NULL,
+        NULL,
+        false,
+        NULL,
+        'payment-service,reporting-service'
+    ),
+    (
+        20,
+        10,
+        false,
+        '2026-09-15 13:43:49.961000 +00:00',
+        'client_secret_basic',
+        'client_credentials',
+        'oidc-client3',
+        '$2a$10$Lhfi764oqNwaaBF/e9aW0.TmUkbKFrO16i12Vw0R0YtL2dSB.F.jK',
+        'openid,profile',
+        'client3',
+        'https://spring.io',
+        'http://127.0.0.1:8080/',
+        'User',
+        NULL,
+        NULL,
+        false,
+        NULL,
+        'payment-service,reporting-service'
+    )
+ON CONFLICT (client_id) DO NOTHING;
