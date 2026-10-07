@@ -33,7 +33,8 @@ jobs:
           distribution: corretto
           java-version: '25'
           cache: maven
-      - run: mvn clean package -DskipTests
+      - run: |
+          mvn clean package -DskipTests && mvn spring-boot:run
 
       - name: Initialize test database
         env:
