@@ -76,7 +76,7 @@ public class Setup implements CommandLineRunner {
         log.info("Assigning permissions to user role ...");
         assignPermissionsToRole(regularRole, permissionService.findByPermissionAccessLevel(PermissionAccessLevel.USER));
 
-
+        log.info("Database permission setup completed!!!");
         //todo set username User to be admin by updating the role
     }
 
